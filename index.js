@@ -31,12 +31,14 @@ server.on('connection', (socket) => {
     }
   });
 
+  const master = i === 0;
   socket.send(JSON.stringify({
     type: 'START',
     words: game.words,
     team: i++ % 2,
     turn: 0,
-    master: false,
+    master,
+    colors: master ? game.colors : undefined,
   }));
 
   socket.on('close', () => clients.delete(socket));
