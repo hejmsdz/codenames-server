@@ -1,17 +1,15 @@
 const ws = require('ws');
+const Game = require('./Game');
 
 const port = process.env.PORT || 8000;
 const server = new ws.Server({ port });
 
 console.log(`listening on port ${server.options.port}`);
 
-const words = [
-  ['soul', 'pound', 'state', 'microscope', 'sub'],
-  ['kid', 'mole', 'Europe', 'pitch', 'hawk'],
-  ['chest', 'flute', 'triangle', 'ice cream', 'pass'],
-  ['dwarf', 'change', 'life', 'satellite', 'rabbit'],
-  ['thumb', 'cat', 'bar', 'novel', 'box'],
-];
+const game = new Game();
+console.log(game.colors);
+
+let i = 0;
 
 const clients = new Set();
 
@@ -27,7 +25,7 @@ server.on('connection', (socket) => {
         type: 'REVEAL',
         i: action.i,
         j: action.j,
-        color: `team${Math.random() > 0.5 ? 0 : 1}`,
+        color: game.colors[action.i][action.j],
         turn: 0
       });
     }
@@ -35,8 +33,8 @@ server.on('connection', (socket) => {
 
   socket.send(JSON.stringify({
     type: 'START',
-    words,
-    team: 0,
+    words: game.words,
+    team: i++ % 2,
     turn: 0,
     master: false,
   }));
