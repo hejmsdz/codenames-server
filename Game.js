@@ -1,3 +1,5 @@
+const childProcess = require('child_process');
+
 const NUM_TEAMS = 2;
 const WORDS_BY_TEAM = [9, 8];
 const BOARD_ROWS= 5;
@@ -12,13 +14,9 @@ class Game {
   }
 
   static randomWords() {
-    return [
-      ['soul', 'pound', 'state', 'microscope', 'sub'],
-      ['kid', 'mole', 'Europe', 'pitch', 'hawk'],
-      ['chest', 'flute', 'triangle', 'ice cream', 'pass'],
-      ['dwarf', 'change', 'life', 'satellite', 'rabbit'],
-      ['thumb', 'cat', 'bar', 'novel', 'box'],
-    ];
+    const out = childProcess.execSync(`cat words.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
+    const words = out.toString().split("\n");
+    return Array(BOARD_ROWS).fill().map((_, i) => words.slice(i * BOARD_COLS, (i + 1) * BOARD_COLS));
   }
 
   static randomColors() {
