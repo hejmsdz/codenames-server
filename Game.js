@@ -56,6 +56,10 @@ class Game {
     return true;
   }
 
+  finish() {
+    this.turn = -1;
+  }
+
   click(i, j) {
     const color = this.colors[i][j];
     if (color.startsWith('team')) {
@@ -64,7 +68,11 @@ class Game {
         return color;
       }
     }
-    this.pass();
+    if (color === 'black') {
+      this.finish();
+    } else {
+      this.pass();
+    }
     return color;
   }
 
