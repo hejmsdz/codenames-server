@@ -24,6 +24,10 @@ server.on('connection', (socket) => {
       const color = game.click(i, j);
       broadcast({ type: 'REVEAL', i, j, color, turn: game.turn });
     }
+    if (action.type === 'PASS') {
+      game.pass();
+      broadcast({ type: 'PASS', turn: game.turn });
+    }
   });
 
   const master = i === 0;

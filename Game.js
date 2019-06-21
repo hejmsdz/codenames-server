@@ -21,9 +21,13 @@ class Game {
         return color;
       }
     }
+    this.pass();
+    return color;
+  }
+
+  pass() {
     this.turn++;
     this.turn %= NUM_TEAMS;
-    return color;
   }
 
   static randomWords() {
