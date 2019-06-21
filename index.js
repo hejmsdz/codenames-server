@@ -7,7 +7,6 @@ const server = new ws.Server({ port });
 console.log(`listening on port ${server.options.port}`);
 
 const game = new Game();
-console.log(game.colors);
 
 let i = 0;
 
@@ -21,13 +20,9 @@ server.on('connection', (socket) => {
   socket.on('message', (message) => {
     const action = JSON.parse(message);
     if (action.type === 'CLICK') {
-      broadcast({
-        type: 'REVEAL',
-        i: action.i,
-        j: action.j,
-        color: game.colors[action.i][action.j],
-        turn: 0
-      });
+      const { i, j } = action;
+      const color = game.click(i, j);
+      broadcast({ type: 'REVEAL', i, j, color, turn: game.turn });
     }
   });
 

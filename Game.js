@@ -13,6 +13,19 @@ class Game {
     this.turn = 0;
   }
 
+  click(i, j) {
+    const color = this.colors[i][j];
+    if (color.startsWith('team')) {
+      const team = parseInt(color.slice(4));
+      if (team === this.turn) {
+        return color;
+      }
+    }
+    this.turn++;
+    this.turn %= NUM_TEAMS;
+    return color;
+  }
+
   static randomWords() {
     const out = childProcess.execSync(`cat words.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
     const words = out.toString().split("\n");
