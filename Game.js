@@ -7,10 +7,28 @@ const BOARD_COLS = 5;
 
 class Game {
   constructor() {
+    this.state = 'NOT_STARTED';
+
     this.words = Game.randomWords();
     this.colors = Game.randomColors();
-    this.players = new Array(NUM_TEAMS).fill().map(() => new Set());
+    this.players = new Map();
     this.turn = 0;
+  }
+
+  addPlayer(socket, name) {
+    this.players.set(socket, { name, team: null, master: false });
+  }
+
+  removePlayer(socket) {
+    this.players.delete(socket);
+  }
+
+  playersCount() {
+    return this.players.size;
+  }
+
+  eachPlayer(callback) {
+    this.players.forEach(callback);
   }
 
   click(i, j) {

@@ -1,24 +1,36 @@
 const ws = require('ws');
-const Game = require('./Game');
+const GamesManager = require('./GamesManager');
 
 const port = process.env.PORT || 8000;
 const server = new ws.Server({ port });
 
 console.log(`listening on port ${server.options.port}`);
 
-const game = new Game();
-
+const manager = new GamesManager();
 let i = 0;
 
-const clients = new Set();
-
-const broadcast = (action) => clients.forEach(socket => socket.send(JSON.stringify(action)));
-
-server.on('connection', (socket) => {
-  clients.add(socket);
+server.on('connection', (socket, request) => {
+  const room = request.url.slice(1);
+  let game;
+  
+  const broadcast = (action) => game.eachPlayer((_, socket) => socket.send(JSON.stringify(action)));
 
   socket.on('message', (message) => {
     const action = JSON.parse(message);
+    if (action.type === 'JOIN') {
+      const { playerName } = action;
+      game = manager.join(room, socket, playerName);
+
+      const master = i === 0;
+      socket.send(JSON.stringify({
+        type: 'START',
+        words: game.words,
+        team: i++ % 2,
+        turn: 0,
+        master,
+        colors: master ? game.colors : undefined,
+      }));
+    }
     if (action.type === 'CLICK') {
       const { i, j } = action;
       const color = game.click(i, j);
@@ -30,15 +42,7 @@ server.on('connection', (socket) => {
     }
   });
 
-  const master = i === 0;
-  socket.send(JSON.stringify({
-    type: 'START',
-    words: game.words,
-    team: i++ % 2,
-    turn: 0,
-    master,
-    colors: master ? game.colors : undefined,
-  }));
-
-  socket.on('close', () => clients.delete(socket));
+  socket.on('close', () => {
+    manager.leave(room, socket);
+  });
 });
