@@ -7,16 +7,17 @@ const BOARD_COLS = 5;
 
 class Game {
   constructor() {
-    this.state = 'NOT_STARTED';
-
-    this.words = Game.randomWords();
-    this.colors = Game.randomColors();
+    this.words = [];
+    this.colors = [];
     this.players = new Map();
-    this.turn = 0;
+    this.turn = -1;
   }
 
   addPlayer(socket, name) {
-    this.players.set(socket, { name, team: null, master: false });
+    const { playerCounts, hasMaster } = this.teamInfo();
+    const team = playerCounts.indexOf(Math.min(...playerCounts));
+    const master = !hasMaster[team];
+    this.players.set(socket, { name, team, master });
   }
 
   removePlayer(socket) {
@@ -29,6 +30,30 @@ class Game {
 
   eachPlayer(callback) {
     this.players.forEach(callback);
+  }
+
+  teamInfo() {
+    const playerCounts = WORDS_BY_TEAM.map(() => 0);
+    const hasMaster = WORDS_BY_TEAM.map(() => false);
+    this.players.forEach(({ team, master }) => {
+      playerCounts[team]++;
+      if (master) {
+        hasMaster[team] = true;
+      }
+    });
+    return { playerCounts, hasMaster };
+  }
+
+  start() {
+    const { playerCounts, hasMaster } = this.teamInfo();
+    if (!(playerCounts.every(n => n > 0) && hasMaster.every(m => m))) {
+      return false;
+    }
+
+    this.words = Game.randomWords();
+    this.colors = Game.randomColors();
+    this.turn = 0;
+    return true;
   }
 
   click(i, j) {

@@ -20,16 +20,21 @@ server.on('connection', (socket, request) => {
     if (action.type === 'JOIN') {
       const { playerName } = action;
       game = manager.join(room, socket, playerName);
-
-      const master = i === 0;
-      socket.send(JSON.stringify({
+      broadcast({
+        type: 'PLAYERS',
+        players: Array.from(game.players.values()),
+      });
+    }
+    if (action.type === 'START') {
+      game.start();
+      game.eachPlayer(({ team, master }, socket) => socket.send(JSON.stringify({
         type: 'START',
-        words: game.words,
-        team: i++ % 2,
-        turn: 0,
+        team,
         master,
-        colors: master ? game.colors : undefined,
-      }));
+        words: game.words,
+        colors: master ? game.colors : null,
+        turn: game.turn,
+      })));
     }
     if (action.type === 'CLICK') {
       const { i, j } = action;
