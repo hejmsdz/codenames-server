@@ -7,7 +7,6 @@ const server = new ws.Server({ port });
 console.log(`listening on port ${server.options.port}`);
 
 const manager = new GamesManager();
-let i = 0;
 
 server.on('connection', (socket, request) => {
   const room = request.url.slice(1);
@@ -20,6 +19,14 @@ server.on('connection', (socket, request) => {
     if (action.type === 'JOIN') {
       const { playerName } = action;
       game = manager.join(room, socket, playerName);
+      broadcast({
+        type: 'PLAYERS',
+        players: Array.from(game.players.values()),
+      });
+    }
+    if (action.type === 'SET_TEAM') {
+      const { team } = action;
+      game.players.get(socket).team = team;
       broadcast({
         type: 'PLAYERS',
         players: Array.from(game.players.values()),
