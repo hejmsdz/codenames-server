@@ -2,6 +2,7 @@ const Game = require('./Game');
 
 class GamesManager {
   constructor() {
+    this.onChange = () => {};
     this.games = new Map();
   }
 
@@ -14,6 +15,7 @@ class GamesManager {
       this.games.set(room, game);
     }
     game.addPlayer(socket, name);
+    this.onChange(this.summary());
     return game;
   }
 
@@ -26,6 +28,16 @@ class GamesManager {
     if (game.playersCount() === 0) {
       this.games.delete(room);
     }
+    this.onChange(this.summary());
+  }
+
+  summary() {
+    const activeGames = [...this.games.entries()].map(([room, game]) => ({
+      room,
+      players: game.teamInfo().playerCounts,
+      turn: game.turn,
+    }));
+    return { type: 'ACTIVE_GAMES', activeGames };
   }
 }
 

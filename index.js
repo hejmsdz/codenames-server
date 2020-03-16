@@ -6,16 +6,29 @@ const server = new ws.Server({ port });
 
 console.log(`listening on port ${server.options.port}`);
 
+const admins = new Set();
+const adminBroadcast = (message) => admins.forEach(socket => socket.send(JSON.stringify(message)));
+
 const manager = new GamesManager();
+manager.onChange = adminBroadcast;
 
 server.on('connection', (socket, request) => {
   const room = request.url.slice(1);
+  if (room === 'admin') {
+    admins.add(socket);
+    socket.send(JSON.stringify(manager.summary()));
+    socket.on('close', () => {
+      admins.delete(socket);
+    });
+    return;
+  }
+
   let game;
-  
   const broadcast = (action) => game.eachPlayer((_, socket) => socket.send(JSON.stringify(action)));
 
   socket.on('message', (message) => {
     let action;
+    const turn0 = game ? game.turn : -1;
     try {
       action = JSON.parse(message);
     } catch (e) {
@@ -63,6 +76,10 @@ server.on('connection', (socket, request) => {
     if (action.type === 'PASS') {
       game.pass();
       broadcast({ type: 'PASS', turn: game.turn });
+    }
+
+    if (game && turn0 !== game.turn) {
+      adminBroadcast({ type: 'TURN_CHANGE', room, turn: game.turn });
     }
   });
 
