@@ -9,7 +9,7 @@ class Game {
   constructor() {
     this.words = [];
     this.colors = [];
-    this.leftToReveal = WORDS_BY_TEAM;
+    this.leftToReveal = [...WORDS_BY_TEAM];
     this.players = new Map();
     this.turn = -1;
     this.winner = -1;
