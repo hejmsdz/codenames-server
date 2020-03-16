@@ -15,7 +15,13 @@ server.on('connection', (socket, request) => {
   const broadcast = (action) => game.eachPlayer((_, socket) => socket.send(JSON.stringify(action)));
 
   socket.on('message', (message) => {
-    const action = JSON.parse(message);
+    let action;
+    try {
+      action = JSON.parse(message);
+    } catch (e) {
+      console.log('invalid message', message);
+    }
+
     if (action.type === 'JOIN') {
       const { playerName } = action;
       game = manager.join(room, socket, playerName);
