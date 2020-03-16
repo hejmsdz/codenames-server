@@ -2,7 +2,6 @@ const childProcess = require('child_process');
 
 const NUM_TEAMS = 2;
 const WORDS_BY_TEAM = [9, 8];
-const TEAM_NAMES = ['red', 'blue'];
 const BOARD_ROWS= 5;
 const BOARD_COLS = 5;
 
@@ -16,15 +15,33 @@ class Game {
     this.winner = -1;
   }
 
-  addPlayer(socket, name) {
+  addPlayer(socket, name, setTeam = null) {
     const { playerCounts, hasMaster } = this.teamInfo();
-    const team = playerCounts.indexOf(Math.min(...playerCounts));
+    const team = setTeam === null ? playerCounts.indexOf(Math.min(...playerCounts)) : setTeam;
     const master = !hasMaster[team];
     this.players.set(socket, { name, team, master });
   }
 
+  setPlayerTeam(socket, team) {
+    const name = this.players.get(socket).name;
+    this.removePlayer(socket);
+    this.addPlayer(socket, name, team);
+  }
+
   removePlayer(socket) {
+    const player = this.players.get(socket);
+    if (!player) {
+      return
+    }
+    const team = player.team;
     this.players.delete(socket);
+    const { hasMaster } = this.teamInfo();
+    if (!hasMaster[team]) {
+      const newMaster = [...this.players.values()].find(player => player.team === team);
+      if (newMaster) {
+        newMaster.master = true;
+      }
+    }
   }
 
   playersCount() {

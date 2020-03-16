@@ -26,7 +26,7 @@ server.on('connection', (socket, request) => {
     }
     if (action.type === 'SET_TEAM') {
       const { team } = action;
-      game.players.get(socket).team = team;
+      game.setPlayerTeam(socket, team);
       broadcast({
         type: 'PLAYERS',
         players: Array.from(game.players.values()),
