@@ -22,6 +22,9 @@ server.on('connection', (socket, request) => {
       console.log('invalid message', message);
     }
 
+    if (action.type === 'PING') {
+      socket.send(JSON.stringify({ type: 'PONG' }));
+    }
     if (action.type === 'JOIN') {
       const { playerName } = action;
       game = manager.join(room, socket, playerName);
