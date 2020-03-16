@@ -15,7 +15,7 @@ class GamesManager {
       this.games.set(room, game);
     }
     game.addPlayer(socket, name);
-    this.onChange(this.summary());
+    this.handleChange();
     return game;
   }
 
@@ -28,6 +28,10 @@ class GamesManager {
     if (game.playersCount() === 0) {
       this.games.delete(room);
     }
+    this.handleChange();
+  }
+
+  handleChange() {
     this.onChange(this.summary());
   }
 

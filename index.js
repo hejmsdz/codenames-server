@@ -53,6 +53,7 @@ server.on('connection', (socket, request) => {
         type: 'PLAYERS',
         players: Array.from(game.players.values()),
       });
+      manager.handleChange();
     }
     if (action.type === 'START') {
       game.start();
