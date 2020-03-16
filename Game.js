@@ -77,6 +77,7 @@ class Game {
 
     this.words = Game.randomWords();
     this.colors = Game.randomColors();
+    this.leftToReveal = [...WORDS_BY_TEAM];
     this.turn = 0;
     return true;
   }
