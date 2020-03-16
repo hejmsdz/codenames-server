@@ -65,6 +65,10 @@ class Game {
   }
 
   start() {
+    if (this.turn > -1) {
+      return true;
+    }
+
     const { playerCounts, hasMaster } = this.teamInfo();
     if (!(playerCounts.every(n => n > 0) && hasMaster.every(m => m))) {
       return false;
