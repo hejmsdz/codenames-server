@@ -47,6 +47,10 @@ server.on('connection', (socket, request) => {
       const { i, j } = action;
       const color = game.click(i, j);
       broadcast({ type: 'REVEAL', i, j, color, turn: game.turn });
+      if (game.isOver()) {
+        console.log('game over!', game.winner);
+        broadcast({ type: 'OVER', winner: game.winner });
+      }
     }
     if (action.type === 'PASS') {
       game.pass();

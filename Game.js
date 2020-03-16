@@ -2,6 +2,7 @@ const childProcess = require('child_process');
 
 const NUM_TEAMS = 2;
 const WORDS_BY_TEAM = [9, 8];
+const TEAM_NAMES = ['red', 'blue'];
 const BOARD_ROWS= 5;
 const BOARD_COLS = 5;
 
@@ -9,8 +10,10 @@ class Game {
   constructor() {
     this.words = [];
     this.colors = [];
+    this.leftToReveal = WORDS_BY_TEAM;
     this.players = new Map();
     this.turn = -1;
+    this.winner = -1;
   }
 
   addPlayer(socket, name) {
@@ -56,20 +59,31 @@ class Game {
     return true;
   }
 
-  finish() {
+  finish(winner) {
+    this.winner = winner;
     this.turn = -1;
+  }
+
+  isOver() {
+    return this.winner > -1;
   }
 
   click(i, j) {
     const color = this.colors[i][j];
     if (color.startsWith('team')) {
       const team = parseInt(color.slice(4));
+      this.leftToReveal[team]--;
+      const winner = this.leftToReveal.findIndex(x => x === 0);
+      if (winner > -1) {
+        this.finish(team);
+      }
       if (team === this.turn) {
         return color;
       }
     }
     if (color === 'black') {
-      this.finish();
+      const winner = (this.turn + 1) % NUM_TEAMS;
+      this.finish(winner);
     } else {
       this.pass();
     }
