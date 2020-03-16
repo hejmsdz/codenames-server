@@ -78,6 +78,7 @@ class Game {
     this.words = Game.randomWords();
     this.colors = Game.randomColors();
     this.leftToReveal = [...WORDS_BY_TEAM];
+    this.winner = -1;
     this.turn = 0;
     return true;
   }
@@ -92,30 +93,33 @@ class Game {
   }
 
   click(i, j) {
+    let keepTurn = false;
     const color = this.colors[i][j];
     if (color.startsWith('team')) {
       const team = parseInt(color.slice(4));
       this.leftToReveal[team]--;
-      const winner = this.leftToReveal.findIndex(x => x === 0);
-      if (winner > -1) {
-        this.finish(team);
-      }
       if (team === this.turn) {
-        return color;
+        keepTurn = true;
       }
-    }
-    if (color === 'black') {
+    } else if (color === 'black') {
       const winner = (this.turn + 1) % NUM_TEAMS;
       this.finish(winner);
-    } else {
+    }
+    if (!keepTurn) {
       this.pass();
+    }
+    const winner = this.leftToReveal.findIndex(x => x === 0);
+    if (winner > -1) {
+      this.finish(winner);
     }
     return color;
   }
 
   pass() {
-    this.turn++;
-    this.turn %= NUM_TEAMS;
+    if (this.turn > -1) {
+      this.turn++;
+      this.turn %= NUM_TEAMS;
+    }
   }
 
   static randomWords() {
