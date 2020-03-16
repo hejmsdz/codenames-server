@@ -67,14 +67,10 @@ server.on('connection', (socket, request) => {
   });
 
   socket.on('close', () => {
-    if (game) {
-      game.removePlayer(socket);
-      broadcast({
-        type: 'PLAYERS',
-        players: Array.from(game.players.values()),
-      });
-    }
-
     manager.leave(room, socket);
+    broadcast({
+      type: 'PLAYERS',
+      players: Array.from(game.players.values()),
+    });
   });
 });

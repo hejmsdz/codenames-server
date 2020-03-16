@@ -31,7 +31,7 @@ class Game {
   removePlayer(socket) {
     const player = this.players.get(socket);
     if (!player) {
-      return
+      return;
     }
     const team = player.team;
     this.players.delete(socket);
@@ -42,6 +42,7 @@ class Game {
         newMaster.master = true;
       }
     }
+    return player;
   }
 
   playersCount() {
