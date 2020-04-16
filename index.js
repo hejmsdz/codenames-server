@@ -44,6 +44,7 @@ server.on('connection', (socket, request) => {
       const { playerName } = action;
       try {
         game = manager.join(room, socket, playerName);
+        respond({ type: 'JOIN', room, playerName });
         broadcast({
           type: 'PLAYERS',
           players: Array.from(game.players.values()),
