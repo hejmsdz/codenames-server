@@ -59,6 +59,12 @@ class Game {
     this.players.forEach(callback);
   }
 
+  setDictionary(dictionary) {
+    if (DICTIONARIES.includes(dictionary)) {
+      this.dictionary = dictionary;
+    }
+  }
+
   teamInfo() {
     const playerCounts = WORDS_BY_TEAM.map(() => 0);
     const hasMaster = WORDS_BY_TEAM.map(() => false);

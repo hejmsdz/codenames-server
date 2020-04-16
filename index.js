@@ -45,6 +45,7 @@ server.on('connection', (socket, request) => {
       try {
         game = manager.join(room, socket, playerName);
         respond({ type: 'JOIN', room, playerName });
+        respond({ type: 'SET_DICTIONARY', dictionary: game.dictionary });
         broadcast({
           type: 'PLAYERS',
           players: Array.from(game.players.values()),
@@ -61,6 +62,10 @@ server.on('connection', (socket, request) => {
         players: Array.from(game.players.values()),
       });
       manager.handleChange();
+    }
+    if (action.type === 'SET_DICTIONARY') {
+      game.setDictionary(action.dictionary);
+      broadcast({ type: 'SET_DICTIONARY', dictionary: game.dictionary });
     }
     if (action.type === 'START') {
       if (game.isActive()) {
