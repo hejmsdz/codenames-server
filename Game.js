@@ -4,6 +4,7 @@ const NUM_TEAMS = 2;
 const WORDS_BY_TEAM = [9, 8];
 const BOARD_ROWS= 5;
 const BOARD_COLS = 5;
+const DICTIONARIES = ['en', 'pl'];
 
 class Game {
   constructor() {
@@ -14,6 +15,7 @@ class Game {
     this.players = new Map();
     this.turn = -1;
     this.winner = -1;
+    this.dictionary = DICTIONARIES[0];
   }
 
   addPlayer(socket, name, setTeam = null) {
@@ -79,7 +81,7 @@ class Game {
       return false;
     }
 
-    this.words = Game.randomWords();
+    this.words = Game.randomWords(this.dictionary);
     this.colors = Game.randomColors();
     this.revealed = [];
     this.leftToReveal = [...WORDS_BY_TEAM];
@@ -142,8 +144,8 @@ class Game {
       );
   }
 
-  static randomWords() {
-    const out = childProcess.execSync(`cat words.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
+  static randomWords(dictionary) {
+    const out = childProcess.execSync(`cat words/${dictionary}.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
     const words = out.toString().split("\n");
     return Game.buildBoard((_i, _j, index) => words[index]);
   }
