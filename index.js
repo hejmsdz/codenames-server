@@ -40,11 +40,15 @@ server.on('connection', (socket, request) => {
     }
     if (action.type === 'JOIN') {
       const { playerName } = action;
-      game = manager.join(room, socket, playerName);
-      broadcast({
-        type: 'PLAYERS',
-        players: Array.from(game.players.values()),
-      });
+      try {
+        game = manager.join(room, socket, playerName);
+        broadcast({
+          type: 'PLAYERS',
+          players: Array.from(game.players.values()),
+        });
+      } catch (e) {
+        socket.send(JSON.stringify({ type: 'ERROR', message: e.message }));
+      }
     }
     if (action.type === 'SET_TEAM') {
       const { team } = action;
@@ -107,9 +111,11 @@ server.on('connection', (socket, request) => {
 
   socket.on('close', () => {
     manager.leave(room, socket);
-    broadcast({
-      type: 'PLAYERS',
-      players: Array.from(game.players.values()),
-    });
+    if (game) {
+      broadcast({
+        type: 'PLAYERS',
+        players: Array.from(game.players.values()),
+      });
+    }
   });
 });

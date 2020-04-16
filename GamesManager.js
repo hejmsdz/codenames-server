@@ -14,6 +14,9 @@ class GamesManager {
       game = new Game();
       this.games.set(room, game);
     }
+    if (name === '') {
+      throw new Error('name_empty');
+    }
     game.addPlayer(socket, name);
     this.handleChange();
     return game;
