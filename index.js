@@ -57,6 +57,7 @@ server.on('connection', (socket, request) => {
     }
     if (action.type === 'START') {
       if (game.isActive()) {
+        const { team, master } = game.players.get(socket);
         socket.send(JSON.stringify({
           type: 'START',
           team,
