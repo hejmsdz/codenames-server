@@ -17,7 +17,7 @@ class Game {
   }
 
   addPlayer(socket, name, setTeam = null) {
-    if ([...map.values()].some((player) => player.name === name)) {
+    if ([...this.players.values()].some((player) => player.name === name)) {
       throw new Error('name_taken');
     }
     const { playerCounts, hasMaster } = this.teamInfo();
