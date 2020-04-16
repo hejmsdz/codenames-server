@@ -126,14 +126,24 @@ class Game {
     }
   }
 
+  static buildBoard(fill) {
+    const fillFunc = (typeof fill === 'function') ? fill : () => fill;
+    return new Array(BOARD_ROWS)
+      .fill()
+      .map((_, i) => new Array(BOARD_COLS)
+        .fill()
+        .map((_, j) => fillFunc(i, j, i * BOARD_ROWS + j))
+      );
+  }
+
   static randomWords() {
     const out = childProcess.execSync(`cat words.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
     const words = out.toString().split("\n");
-    return Array(BOARD_ROWS).fill().map((_, i) => words.slice(i * BOARD_COLS, (i + 1) * BOARD_COLS));
+    return Game.buildBoard((_i, _j, index) => words[index]);
   }
 
   static randomColors() {
-    const colors = new Array(BOARD_ROWS).fill().map(() => new Array(BOARD_COLS).fill('neutral'));
+    const colors = Game.buildBoard('neutral');
     const randomIndex = () => [
       Math.floor(Math.random() * BOARD_ROWS),
       Math.floor(Math.random() * BOARD_COLS),
