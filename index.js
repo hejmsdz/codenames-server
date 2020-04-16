@@ -56,15 +56,36 @@ server.on('connection', (socket, request) => {
       manager.handleChange();
     }
     if (action.type === 'START') {
-      game.start();
-      game.eachPlayer(({ team, master }, socket) => socket.send(JSON.stringify({
-        type: 'START',
-        team,
-        master,
-        words: game.words,
-        colors: master ? game.colors : null,
-        turn: game.turn,
-      })));
+      if (game.isActive()) {
+        const { team, master } = game.players.get(socket);
+        socket.send(JSON.stringify({
+          type: 'START',
+          team,
+          master,
+          words: game.words,
+          colors: master ? game.colors : null,
+          turn: game.turn,
+        }));
+        if (!master) {
+          game.revealed.forEach(({ i, j }) => socket.send(JSON.stringify({
+            type: 'REVEAL',
+            i,
+            j,
+            turn: game.turn,
+            color: game.colors[i][j],
+          })));
+        }
+      } else {
+        game.start();
+        game.eachPlayer(({ team, master }, socket) => socket.send(JSON.stringify({
+          type: 'START',
+          team,
+          master,
+          words: game.words,
+          colors: master ? game.colors : null,
+          turn: game.turn,
+        })));
+      };
     }
     if (action.type === 'CLICK') {
       const { i, j } = action;

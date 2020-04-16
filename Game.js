@@ -9,6 +9,7 @@ class Game {
   constructor() {
     this.words = [];
     this.colors = [];
+    this.revealed = [];
     this.leftToReveal = [...WORDS_BY_TEAM];
     this.players = new Map();
     this.turn = -1;
@@ -66,7 +67,7 @@ class Game {
   }
 
   start() {
-    if (this.turn > -1) {
+    if (this.isActive()) {
       return true;
     }
 
@@ -77,6 +78,7 @@ class Game {
 
     this.words = Game.randomWords();
     this.colors = Game.randomColors();
+    this.revealed = [];
     this.leftToReveal = [...WORDS_BY_TEAM];
     this.winner = -1;
     this.turn = 0;
@@ -92,9 +94,14 @@ class Game {
     return this.winner > -1;
   }
 
+  isActive() {
+    return this.turn > -1;
+  }
+
   click(i, j) {
     let keepTurn = false;
     const color = this.colors[i][j];
+    this.revealed.push({ i, j });
     if (color.startsWith('team')) {
       const team = parseInt(color.slice(4));
       this.leftToReveal[team]--;
@@ -122,14 +129,24 @@ class Game {
     }
   }
 
+  static buildBoard(fill) {
+    const fillFunc = (typeof fill === 'function') ? fill : () => fill;
+    return new Array(BOARD_ROWS)
+      .fill()
+      .map((_, i) => new Array(BOARD_COLS)
+        .fill()
+        .map((_, j) => fillFunc(i, j, i * BOARD_ROWS + j))
+      );
+  }
+
   static randomWords() {
     const out = childProcess.execSync(`cat words.txt | sort -R | head -n ${BOARD_ROWS * BOARD_COLS}`);
     const words = out.toString().split("\n");
-    return Array(BOARD_ROWS).fill().map((_, i) => words.slice(i * BOARD_COLS, (i + 1) * BOARD_COLS));
+    return Game.buildBoard((_i, _j, index) => words[index]);
   }
 
   static randomColors() {
-    const colors = new Array(BOARD_ROWS).fill().map(() => new Array(BOARD_COLS).fill('neutral'));
+    const colors = Game.buildBoard('neutral');
     const randomIndex = () => [
       Math.floor(Math.random() * BOARD_ROWS),
       Math.floor(Math.random() * BOARD_COLS),
