@@ -9,6 +9,7 @@ class Game {
   constructor() {
     this.words = [];
     this.colors = [];
+    this.revealed = [];
     this.leftToReveal = [...WORDS_BY_TEAM];
     this.players = new Map();
     this.turn = -1;
@@ -77,6 +78,7 @@ class Game {
 
     this.words = Game.randomWords();
     this.colors = Game.randomColors();
+    this.revealed = [];
     this.leftToReveal = [...WORDS_BY_TEAM];
     this.winner = -1;
     this.turn = 0;
@@ -99,6 +101,7 @@ class Game {
   click(i, j) {
     let keepTurn = false;
     const color = this.colors[i][j];
+    this.revealed.push({ i, j });
     if (color.startsWith('team')) {
       const team = parseInt(color.slice(4));
       this.leftToReveal[team]--;
