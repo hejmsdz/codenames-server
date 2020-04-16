@@ -1,9 +1,0 @@
-class Server {
-  handleConnection() {
-
-  }
-
-  handleMessage() {
-    
-  }
-}
