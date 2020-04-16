@@ -66,7 +66,7 @@ class Game {
   }
 
   start() {
-    if (this.turn > -1) {
+    if (this.isActive()) {
       return true;
     }
 
@@ -90,6 +90,10 @@ class Game {
 
   isOver() {
     return this.winner > -1;
+  }
+
+  isActive() {
+    return this.turn > -1;
   }
 
   click(i, j) {
