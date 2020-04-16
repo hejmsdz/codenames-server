@@ -7,7 +7,8 @@ const server = new ws.Server({ port });
 console.log(`listening on port ${server.options.port}`);
 
 const admins = new Set();
-const adminBroadcast = (message) => admins.forEach(socket => socket.send(JSON.stringify(message)));
+const sendJSON = (socket, message) => socket.send(JSON.stringify(message));
+const adminBroadcast = (message) => admins.forEach(socket => sendJSON(socket, message));
 
 const manager = new GamesManager();
 manager.onChange = adminBroadcast;
@@ -24,7 +25,8 @@ server.on('connection', (socket, request) => {
   }
 
   let game;
-  const broadcast = (action) => game.eachPlayer((_, socket) => socket.send(JSON.stringify(action)));
+  const broadcast = (action) => game.eachPlayer((_, socket) => sendJSON(socket, action));
+  const respond = (action) => sendJSON(socket, action);
 
   socket.on('message', (message) => {
     let action;
@@ -36,7 +38,7 @@ server.on('connection', (socket, request) => {
     }
 
     if (action.type === 'PING') {
-      socket.send(JSON.stringify({ type: 'PONG' }));
+      respond({ type: 'PONG' });
     }
     if (action.type === 'JOIN') {
       const { playerName } = action;
@@ -47,7 +49,7 @@ server.on('connection', (socket, request) => {
           players: Array.from(game.players.values()),
         });
       } catch (e) {
-        socket.send(JSON.stringify({ type: 'ERROR', message: e.message }));
+        respond({ type: 'ERROR', message: e.message });
       }
     }
     if (action.type === 'SET_TEAM') {
@@ -62,7 +64,26 @@ server.on('connection', (socket, request) => {
     if (action.type === 'START') {
       if (game.isActive()) {
         const { team, master } = game.players.get(socket);
-        socket.send(JSON.stringify({
+        respond({
+          type: 'START',
+          team,
+          master,
+          words: game.words,
+          colors: master ? game.colors : null,
+          turn: game.turn,
+        });
+        if (!master) {
+          game.revealed.forEach(({ i, j }) => respond({
+            type: 'REVEAL',
+            i,
+            j,
+            turn: game.turn,
+            color: game.colors[i][j],
+          }));
+        }
+      } else {
+        game.start();
+        game.eachPlayer(({ team, master }, socket) => sendJSON(socket, {
           type: 'START',
           team,
           master,
@@ -70,25 +91,6 @@ server.on('connection', (socket, request) => {
           colors: master ? game.colors : null,
           turn: game.turn,
         }));
-        if (!master) {
-          game.revealed.forEach(({ i, j }) => socket.send(JSON.stringify({
-            type: 'REVEAL',
-            i,
-            j,
-            turn: game.turn,
-            color: game.colors[i][j],
-          })));
-        }
-      } else {
-        game.start();
-        game.eachPlayer(({ team, master }, socket) => socket.send(JSON.stringify({
-          type: 'START',
-          team,
-          master,
-          words: game.words,
-          colors: master ? game.colors : null,
-          turn: game.turn,
-        })));
       };
     }
     if (action.type === 'CLICK') {
